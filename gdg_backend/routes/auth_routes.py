@@ -5,7 +5,7 @@ from firebase.database import create_user_profile, get_user_role
 
 auth_bp = Blueprint("auth", __name__)
 
-FIREBASE_API_KEY = "YOUR_FIREBASE_WEB_API_KEY"
+FIREBASE_API_KEY = "AIzaSyAn7RDBHo1XJdTte0U2u0rAEbNm0lWhx6Y"
 
 
 # ---------------- REGISTER ----------------
