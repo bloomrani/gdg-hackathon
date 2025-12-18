@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from firebase.auth import require_auth
 from firebase.database import create_issue
+from firebase.database import get_issues_by_user
 
 student_bp = Blueprint("student", __name__)
 
@@ -25,3 +26,9 @@ def report_issue():
         "message": "Issue reported successfully",
         "issue_id": issue_id
     }), 201
+@student_bp.route("/my-issues", methods=["GET"])
+@require_auth
+def my_issues():
+    user_id = request.user["uid"]
+    issues = get_issues_by_user(user_id)
+    return jsonify(issues), 200
