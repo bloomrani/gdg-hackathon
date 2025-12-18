@@ -1,6 +1,6 @@
 from firebase.init import db
 from datetime import datetime
-from google.cloud.firestore import Query
+
 
 def create_user_profile(uid, data):
     user = {
@@ -34,14 +34,8 @@ def create_issue(data, user_id):
 
     _, doc_ref = db.collection("issues").add(issue)
     return doc_ref.id
-
 def get_issues_by_user(user_id):
-    issues_ref = (
-        db.collection("issues")
-        .where("created_by", "==", user_id)
-        .order_by("created_at", direction=Query.DESCENDING)
-    )
-
+    issues_ref = db.collection("issues").where("created_by", "==", user_id)
     docs = issues_ref.stream()
 
     issues = []
@@ -63,4 +57,3 @@ def get_all_issues():
         issues.append(data)
 
     return issues
-
