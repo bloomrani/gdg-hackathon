@@ -1,48 +1,80 @@
-import collegeBg from "../assets/college.png";
-import collegeLogo from "../assets/stcet-logo.png";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 export default function Login() {
-  return (
-    <div
-      className="min-h-screen bg-cover bg-center relative overflow-x-hidden"
-      style={{ backgroundImage: `url(${collegeBg})` }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
+  const navigate = useNavigate();
 
-      {/* Content wrapper */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16">
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email.endsWith("@stcet.ac.in")) {
+      return setError("Please use your STCET college email.");
+    }
+
+    if (!password) {
+      return setError("Password is required.");
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", res.data.role);
+
+      if (res.data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/student");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Login failed. Please check your credentials."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
         
         {/* HERO SECTION */}
-        <div className="text-center mb-10 flex flex-col items-center">
-          
-          {/* Logo */}
-          <img
-            src={collegeLogo}
-            alt="STCET Logo"
-            className="h-20 md:h-24 w-auto mb-4 drop-shadow-md"
-          />
-
-          {/* Title */}
+        <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide">
-            STCET CAMPUS ISSUE PORTAL
+            Campus Issue Portal
           </h1>
-
-          {/* Subtitle */}
-          <p className="mt-3 text-slate-200 text-sm md:text-base">
-            Report and manage campus issues efficiently
-          </p>
+          <p className="mt-3 text-slate-300 text-sm md:text-base">
+            Report, track and resolve campus issues through a centralized digital platform.          </p>
         </div>
 
         {/* LOGIN CARD */}
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-          
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-xl font-semibold text-slate-800 text-center">
             Login
           </h2>
 
-          <form className="mt-6 space-y-4">
+          {error && (
+            <p className="mt-4 text-sm text-red-600 text-center">
+              {error}
+            </p>
+          )}
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             
             {/* Email */}
             <div>
@@ -51,11 +83,10 @@ export default function Login() {
               </label>
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="yourname@stcet.ac.in"
-                pattern=".+@stcet\.ac\.in"
-                title="Please use your college email ID"
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
 
@@ -66,35 +97,39 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
 
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+              disabled={loading}
+              className={`w-full py-2 rounded-lg font-medium transition ${
+                loading
+                  ? "bg-blue-400 text-white cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
 
-         {/* Register link */}
-<p className="text-sm text-slate-500 text-center mt-4">
-  New user?{" "}
-  <Link
-    to="/register"
-    className="text-blue-600 hover:underline font-medium"
-  >
-    Register here
-  </Link>
-</p>
+          <p className="text-sm text-slate-500 text-center mt-4">
+            New user?{" "}
+            <Link
+              to="/register"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Register here
+            </Link>
+          </p>
 
-          {/* Footer note */}
           <p className="text-xs text-slate-400 text-center mt-6">
-            Authorized STCET users only
+            Authorized institutional users only
           </p>
         </div>
       </div>

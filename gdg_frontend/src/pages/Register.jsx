@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import collegeBg from "../assets/college.png";
-import collegeLogo from "../assets/stcet-logo.png";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/api";
 
 export default function Register() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     dept: "",
@@ -13,6 +14,7 @@ export default function Register() {
   });
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -21,10 +23,9 @@ export default function Register() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // -------- Client-side validation --------
     if (!formData.name.trim()) {
       return setError("Name is required.");
     }
@@ -41,50 +42,51 @@ export default function Register() {
       return setError("Password must be at least 8 characters long.");
     }
 
-    // If all validations pass
     setError("");
+    setLoading(true);
 
-    // For now, just log the data
-    console.log("Registration data:", formData);
+    try {
+      await api.post("/auth/register", {
+        name: formData.name,
+        dept: formData.dept,
+        year: formData.year,
+        email: formData.email,
+        password: formData.password,
+      });
 
-    // Later this will call:
-    // POST /auth/register
+      alert("Registration successful! Please login.");
+      navigate("/");
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center relative overflow-x-hidden"
-      style={{ backgroundImage: `url(${collegeBg})` }}
-    >
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
-
-      {/* Content wrapper */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
         
         {/* HERO SECTION */}
-        <div className="text-center mb-10 flex flex-col items-center">
-          <img
-            src={collegeLogo}
-            alt="STCET Logo"
-            className="h-20 md:h-24 w-auto mb-4 drop-shadow-md"
-          />
+        <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide">
-            STCET CAMPUS ISSUE PORTAL
+            Campus Issue Portal
           </h1>
-          <p className="mt-3 text-slate-200 text-sm md:text-base">
-            New User Registration
+          <p className="mt-3 text-slate-300 text-sm md:text-base">
+            Create an account to report and track campus issues
           </p>
         </div>
 
         {/* REGISTER CARD */}
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
-          
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
           <h2 className="text-xl font-semibold text-slate-800 text-center">
             Register
           </h2>
 
-          {/* Error message */}
           {error && (
             <p className="mt-4 text-sm text-red-600 text-center">
               {error}
@@ -178,13 +180,17 @@ export default function Register() {
             {/* Register Button */}
             <button
               type="submit"
-              className="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition"
+              disabled={loading}
+              className={`w-full py-2 rounded-lg font-medium transition ${
+                loading
+                  ? "bg-green-400 text-white cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </button>
           </form>
 
-          {/* Login link */}
           <p className="text-sm text-slate-500 text-center mt-4">
             Already registered?{" "}
             <Link to="/" className="text-blue-600 hover:underline font-medium">
@@ -193,7 +199,7 @@ export default function Register() {
           </p>
 
           <p className="text-xs text-slate-400 text-center mt-6">
-            Registration is restricted to STCET users
+            Registration is restricted to institutional users
           </p>
         </div>
       </div>
