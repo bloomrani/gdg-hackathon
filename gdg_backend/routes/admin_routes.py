@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from firebase.auth import require_auth
-from role_guard import role_required
+from utils.role_guard import role_required
 from firebase.database import get_all_issues, update_issue_status
 
 admin_bp = Blueprint("admin", __name__)
