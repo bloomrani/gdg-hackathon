@@ -19,3 +19,18 @@ def get_user_role(uid):
     if doc.exists:
         return doc.to_dict().get("role")
     return None
+
+def create_issue(data, user_id):
+    issue = {
+        "title": data.get("title"),
+        "description": data.get("description"),
+        "category": data.get("category"),
+        "severity": data.get("severity"),
+        "location": data.get("location"),
+        "status": "Pending",
+        "created_by": user_id,
+        "created_at": datetime.utcnow()
+    }
+
+    _, doc_ref = db.collection("issues").add(issue)
+    return doc_ref.id
