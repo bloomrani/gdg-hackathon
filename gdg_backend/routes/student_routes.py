@@ -1,11 +1,27 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, request, jsonify
 from firebase.auth import require_auth
-from utils.role_guard import role_required
+from firebase.database import create_issue
 
 student_bp = Blueprint("student", __name__)
 
-@student_bp.route("/dashboard")
+@student_bp.route("/report", methods=["POST"])
 @require_auth
-@role_required("student")
-def student_dashboard():
-    return jsonify({"msg": "Welcome Student"})
+def report_issue():
+    data = request.json
+
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    required_fields = ["title", "description", "category", "severity", "location"]
+    for field in required_fields:
+        if not data.get(field):
+            return jsonify({"error": f"{field} is required"}), 400
+
+    user_id = request.user["uid"]
+
+    issue_id = create_issue(data, user_id)
+
+    return jsonify({
+        "message": "Issue reported successfully",
+        "issue_id": issue_id
+    }), 201
