@@ -1,3 +1,11 @@
+from flask import Flask
+from flask_cors import CORS
+
+from routes.student_routes import student_bp
+from routes.admin_routes import admin_bp
+from routes.auth_routes import auth_bp
+
+
 def create_app():
     app = Flask(__name__)
     CORS(app)
@@ -13,7 +21,6 @@ def create_app():
             "message": "Campus Issue Reporting API"
         }
 
-    # 🔥 KEEP-ALIVE PING
     @app.route("/ping")
     def ping():
         return {
@@ -22,3 +29,11 @@ def create_app():
         }
 
     return app
+
+
+# 🔑 MUST BE AT TOP LEVEL
+app = create_app()
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
