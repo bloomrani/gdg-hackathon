@@ -34,3 +34,28 @@ def create_issue(data, user_id):
 
     _, doc_ref = db.collection("issues").add(issue)
     return doc_ref.id
+
+def get_issues_by_user(user_id):
+    issues_ref = db.collection("issues").where("created_by", "==", user_id)
+    docs = issues_ref.stream()
+
+    issues = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        issues.append(data)
+
+    return issues
+
+
+def get_all_issues():
+    docs = db.collection("issues").stream()
+
+    issues = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        issues.append(data)
+
+    return issues
+
