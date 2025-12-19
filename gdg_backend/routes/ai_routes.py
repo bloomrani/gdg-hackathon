@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from firebase.auth import require_auth
 from ai.gemini import (
-    generate_issue_description,
+    analyze_issue,
     summarize_issue,
     is_duplicate_issue
 )
@@ -12,9 +12,9 @@ ai_bp = Blueprint("ai", __name__)
 # --------------------------------
 # 1. Autofill Description
 # --------------------------------
-@ai_bp.route("/generate-description", methods=["POST"])
+@ai_bp.route("/generate-issue-fields", methods=["POST"])
 @require_auth
-def generate_description():
+def generate_issue_fields():
     data = request.get_json()
 
     if not data:
@@ -25,11 +25,9 @@ def generate_description():
     if not topic:
         return jsonify({"error": "Topic is required"}), 400
 
-    description = generate_issue_description(topic)
+    ai_result = analyze_issue(topic)
 
-    return jsonify({
-        "description": description
-    }), 200
+    return jsonify(ai_result),200
 
 
 # --------------------------------
