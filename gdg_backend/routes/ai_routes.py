@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from firebase.auth import require_auth
 from ai.gemini import (
-    analyze_issue,
+    generate_issue_fields,
     summarize_issue,
     is_duplicate_issue
 )
@@ -25,7 +25,7 @@ def generate_issue_fields():
     if not topic:
         return jsonify({"error": "Topic is required"}), 400
 
-    ai_result = analyze_issue(topic)
+    ai_result = generate_issue_fields(topic)
 
     return jsonify(ai_result),200
 
