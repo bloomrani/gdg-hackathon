@@ -41,8 +41,12 @@ Issue title: {topic}
         response = model.generate_content(prompt)
         text = response.text.strip()
 
-        if not text:
-            raise ValueError("Empty AI response")
+       if not text:
+            return {
+        "description": "AI service is temporarily unavailable. Please fill the details manually.",
+        "category": "",
+        "severity": "",
+        }
 
         # Remove code fences
         text = re.sub(r"```json|```", "", text).strip()
