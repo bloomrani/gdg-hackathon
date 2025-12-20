@@ -76,13 +76,22 @@ def summarize_issue(description: str) -> str:
     if not description or not description.strip():
         return ""
 
-    prompt = f"""
-    Summarize the following issue description into ONE clear sentence.
-    The sentence should help an admin quickly understand the issue.
+   prompt = f"""
+You are assisting a college administrator.
 
-    Description:
-    "{description}"
-    """
+Given the issue description below, generate a SINGLE concise sentence
+that summarizes the core problem and its impact.
+
+Rules:
+- Do NOT repeat sentences from the description
+- Do NOT start with "The issue is" or similar filler
+- Focus on WHAT is broken and WHY it matters
+- Be professional and action-oriented
+- Max 20 words
+
+Issue Description:
+\"\"\"{description}\"\"\"
+"""
 
     try:
         response = model.generate_content(prompt)
