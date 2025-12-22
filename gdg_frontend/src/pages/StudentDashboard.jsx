@@ -7,32 +7,52 @@ export default function StudentDashboard() {
   const [recentIssues, setRecentIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [showMyIssues, setShowMyIssues] = useState(false);
   const [myIssuesLoading, setMyIssuesLoading] = useState(false);
+
   const [selectedIssue, setSelectedIssue] = useState(null);
   const [issueDetailLoading, setIssueDetailLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchRecentIssues = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) throw new Error("User not authenticated");
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    resolved: 0,
+  });
 
-        const res = await api.get("/student/recent-issues");
-        setRecentIssues(res.data);
-      } catch (err) {
-        setError(
-          err.response?.data?.error ||
-          "Failed to load recent issues."
-        );
+  /* =========================
+     FETCH DASHBOARD DATA
+  ========================= */
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        await Promise.all([
+          fetchRecentIssues(),
+          fetchStats(),
+        ]);
+      } catch  {
+        setError("Failed to load dashboard data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRecentIssues();
+    fetchDashboardData();
   }, []);
 
+  const fetchRecentIssues = async () => {
+    const res = await api.get("/student/recent-issues");
+    setRecentIssues(res.data);
+  };
+
+  const fetchStats = async () => {
+    const res = await api.get("/student/issue-stats");
+    setStats(res.data);
+  };
+
+  /* =========================
+     LAZY LOAD MY ISSUES
+  ========================= */
   const loadMyIssues = async () => {
     if (myIssues.length > 0) return;
 
@@ -40,47 +60,34 @@ export default function StudentDashboard() {
       setMyIssuesLoading(true);
       const res = await api.get("/student/my-issues");
       setMyIssues(res.data);
-    } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        "Failed to load your issues."
-      );
+    } catch  {
+      setError("Failed to load your issues.");
     } finally {
       setMyIssuesLoading(false);
     }
   };
 
+  /* =========================
+     ISSUE MODAL
+  ========================= */
   const openIssueModal = async (issueId) => {
     try {
       setIssueDetailLoading(true);
       const res = await api.get(`/student/issues/${issueId}`);
       setSelectedIssue(res.data);
-    } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        "Failed to load issue details."
-      );
+    } catch  {
+      setError("Failed to load issue details.");
     } finally {
       setIssueDetailLoading(false);
     }
   };
 
-  const closeModal = () => {
-    setSelectedIssue(null);
-  };
-
-  const totalIssues = myIssues.length;
-  const pendingIssues = myIssues.filter(
-    (issue) => issue.status === "Pending"
-  ).length;
-  const resolvedIssues = myIssues.filter(
-    (issue) => issue.status === "Resolved"
-  ).length;
+  const closeModal = () => setSelectedIssue(null);
 
   if (loading) {
     return (
       <p className="text-center text-slate-500 mt-10">
-        Loading your issues...
+        Loading your dashboard...
       </p>
     );
   }
@@ -96,6 +103,7 @@ export default function StudentDashboard() {
   return (
     <>
       <div className="space-y-8">
+
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
@@ -108,9 +116,9 @@ export default function StudentDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard title="Total Issues" value={totalIssues} />
-          <StatCard title="Pending" value={pendingIssues} color="text-yellow-600" />
-          <StatCard title="Resolved" value={resolvedIssues} color="text-green-600" />
+          <StatCard title="Total Issues" value={stats.total} />
+          <StatCard title="Pending" value={stats.pending} color="text-yellow-600" />
+          <StatCard title="Resolved" value={stats.resolved} color="text-green-600" />
         </div>
 
         {/* Action Button */}
@@ -143,16 +151,7 @@ export default function StudentDashboard() {
                     <p className="font-medium text-slate-800">{issue.title}</p>
                     <p className="text-sm text-slate-500">{issue.category}</p>
                   </div>
-
-                  <span
-                    className={`text-sm font-medium px-3 py-1 rounded-full ${
-                      issue.status === "Resolved"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {issue.status}
-                  </span>
+                  <StatusBadge status={issue.status} />
                 </button>
               ))}
             </div>
@@ -166,10 +165,12 @@ export default function StudentDashboard() {
               setShowMyIssues((prev) => !prev);
               if (!showMyIssues) loadMyIssues();
             }}
-            className="flex items-center justify-between w-full text-left"
+            className="flex items-center justify-between w-full"
           >
-            <h2 className="text-lg font-semibold text-slate-800">My Issues</h2>
-            <span className="text-slate-500 text-xl">
+            <h2 className="text-lg font-semibold text-slate-800">
+              My Issues
+            </h2>
+            <span className="text-xl text-slate-500">
               {showMyIssues ? "−" : "+"}
             </span>
           </button>
@@ -194,15 +195,7 @@ export default function StudentDashboard() {
                         <p className="font-medium text-slate-800">{issue.title}</p>
                         <p className="text-sm text-slate-500">{issue.category}</p>
                       </div>
-                      <span
-                        className={`text-sm font-medium px-3 py-1 rounded-full ${
-                          issue.status === "Resolved"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {issue.status}
-                      </span>
+                      <StatusBadge status={issue.status} />
                     </div>
                   </button>
                 ))
@@ -212,11 +205,10 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      {/* Issue Detail Modal */}
+      {/* Modal */}
       {selectedIssue && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 relative">
-
             <button
               onClick={closeModal}
               className="absolute top-3 right-3 text-slate-400 hover:text-slate-600"
@@ -234,17 +226,9 @@ export default function StudentDashboard() {
                   {selectedIssue.title}
                 </h2>
 
-                <p className="text-sm text-slate-500">
-                  Category: {selectedIssue.category}
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  Location: {selectedIssue.location}
-                </p>
-
-                <p className="text-sm text-slate-500">
-                  Severity: {selectedIssue.severity}
-                </p>
+                <Detail label="Category" value={selectedIssue.category} />
+                <Detail label="Location" value={selectedIssue.location} />
+                <Detail label="Severity" value={selectedIssue.severity} />
 
                 <div>
                   <p className="font-medium text-slate-800 mb-1">
@@ -255,15 +239,7 @@ export default function StudentDashboard() {
                   </p>
                 </div>
 
-                <span
-                  className={`inline-block text-sm font-medium px-3 py-1 rounded-full ${
-                    selectedIssue.status === "Resolved"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {selectedIssue.status}
-                </span>
+                <StatusBadge status={selectedIssue.status} />
               </div>
             )}
           </div>
@@ -273,7 +249,10 @@ export default function StudentDashboard() {
   );
 }
 
-/* Reusable stat card component */
+/* =========================
+   REUSABLE COMPONENTS
+========================= */
+
 function StatCard({ title, value, color = "text-slate-800" }) {
   return (
     <div className="bg-white rounded-xl shadow p-5">
@@ -282,5 +261,27 @@ function StatCard({ title, value, color = "text-slate-800" }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  return (
+    <span
+      className={`text-sm font-medium px-3 py-1 rounded-full ${
+        status === "Resolved"
+          ? "bg-green-100 text-green-700"
+          : "bg-yellow-100 text-yellow-700"
+      }`}
+    >
+      {status}
+    </span>
+  );
+}
+
+function Detail({ label, value }) {
+  return (
+    <p className="text-sm text-slate-500">
+      {label}: {value}
+    </p>
   );
 }
