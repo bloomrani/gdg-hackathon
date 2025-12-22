@@ -3,47 +3,51 @@ import { useEffect, useState } from "react";
 import api from "../api/api";
 
 export default function StudentDashboard() {
-  const [issues, setIssues] = useState([]);
+const [myIssues, setMyIssues] = useState([]);
+const [recentIssues, setRecentIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchIssues = async () => {
-      try {
-        const token = localStorage.getItem("token");
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("User not authenticated");
 
-        if (!token) {
-          throw new Error("User not authenticated");
-        }
+      const [myIssuesRes, recentIssuesRes] = await Promise.all([
+        api.get("/student/my-issues", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        api.get("/student/recent-issues", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
-        const res = await api.get("/student/my-issues", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      setMyIssues(myIssuesRes.data);
+      setRecentIssues(recentIssuesRes.data);
 
-        setIssues(res.data);
-      } catch (err) {
-        setError(
-          err.response?.data?.error ||
-          "Failed to load issues. Please try again."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      setError(
+        err.response?.data?.error ||
+        "Failed to load dashboard data."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchIssues();
-  }, []);
+  fetchData();
+}, []);
+
 
   // Derived stats
-  const totalIssues = issues.length;
-  const pendingIssues = issues.filter(
-    (issue) => issue.status === "Pending"
-  ).length;
-  const resolvedIssues = issues.filter(
-    (issue) => issue.status === "Resolved"
-  ).length;
+const totalIssues = myIssues.length;
+const pendingIssues = myIssues.filter(
+  (issue) => issue.status === "Pending"
+).length;
+const resolvedIssues = myIssues.filter(
+  (issue) => issue.status === "Resolved"
+).length;
 
   if (loading) {
     return (
@@ -104,13 +108,13 @@ export default function StudentDashboard() {
           Recent Issues
         </h2>
 
-        {issues.length === 0 ? (
+        {recentIssues.length === 0 ? (
           <p className="text-slate-500">
-            You haven’t reported any issues yet.
+              No issues reported in the last 7 days.
           </p>
         ) : (
           <div className="space-y-3">
-            {issues.map((issue, index) => (
+            {recentIssues.map((issue, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between border border-slate-200 rounded-lg px-4 py-3"
