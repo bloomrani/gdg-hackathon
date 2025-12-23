@@ -149,4 +149,14 @@ def update_issue_status(issue_id, new_status):
         update_data["rejected_at"] = datetime.utcnow()
 
     issue_ref.update(update_data)
+def get_admin_emails():
+    admins = db.collection("users").where("role", "==", "admin").stream()
+    emails = []
+
+    for doc in admins:
+        data = doc.to_dict()
+        if data.get("email"):
+            emails.append(data["email"])
+
+    return emails
 
