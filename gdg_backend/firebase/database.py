@@ -1,5 +1,10 @@
 from firebase.init import db
 from datetime import datetime,timedelta
+# =========================
+# Issue lifecycle constants
+# =========================
+VALID_STATUSES = ["Pending", "In Progress", "Resolved", "Rejected"]
+TERMINAL_STATUSES = ["Resolved", "Rejected"]
 
 
 def create_user_profile(uid, data):
@@ -116,7 +121,32 @@ def get_issue_stats_by_user(user_id):
     }
 
 def update_issue_status(issue_id, new_status):
+    if new_status not in VALID_STATUSES:
+        raise ValueError("Invalid status")
+
     issue_ref = db.collection("issues").document(issue_id)
-    issue_ref.update({
+    issue_doc = issue_ref.get()
+
+    if not issue_doc.exists:
+        raise ValueError("Issue not found")
+
+    issue_data = issue_doc.to_dict()
+    current_status = issue_data.get("status")
+
+    # 🔒 Block terminal states
+    if current_status in TERMINAL_STATUSES:
+        raise PermissionError("Issue is already closed")
+
+    update_data = {
         "status": new_status
-    })
+    }
+
+    # 🕒 Add terminal timestamps
+    if new_status == "Resolved":
+        update_data["resolved_at"] = datetime.utcnow()
+
+    elif new_status == "Rejected":
+        update_data["rejected_at"] = datetime.utcnow()
+
+    issue_ref.update(update_data)
+
