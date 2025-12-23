@@ -8,9 +8,21 @@ from firebase.database import get_issue_stats_by_user
 from firebase.database import get_admin_emails
 from utils.email_service import send_email
 from utils.email_templates import admin_new_issue_email
+from threading import Thread
 
 
 student_bp = Blueprint("student", __name__)
+
+
+def send_email_async(to_emails, subject, html_content):
+    try:
+        send_email(
+            to_emails=to_emails,
+            subject=subject,
+            html_content=html_content
+        )
+    except Exception as e:
+        print("❌ Async email failed:", e)
 
 @student_bp.route("/report", methods=["POST"])
 @require_auth
@@ -27,23 +39,29 @@ def report_issue():
 
     user_id = request.user["uid"]
 
-    # 1️⃣ Create issue
+    # 1️⃣ Create issue (FAST)
     issue_id = create_issue(data, user_id)
 
-    # 2️⃣ Notify admins
+    # 2️⃣ Notify admins (ASYNC – non-blocking)
     admin_emails = get_admin_emails()
     if admin_emails:
         email_body = admin_new_issue_email(data)
-        send_email(
-            to_emails=admin_emails,
-            subject="New Campus Issue Reported",
-            html_content=email_body
-        )
 
+        Thread(
+            target=send_email_async,
+            kwargs={
+                "to_emails": admin_emails,
+                "subject": "New Campus Issue Reported",
+                "html_content": email_body
+            }
+        ).start()
+
+    # 3️⃣ Respond immediately
     return jsonify({
         "message": "Issue reported successfully",
         "issue_id": issue_id
     }), 201
+
 @student_bp.route("/my-issues", methods=["GET"])
 @require_auth
 def my_issues():
