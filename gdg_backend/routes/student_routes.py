@@ -5,6 +5,10 @@ from firebase.database import get_issues_by_user
 from firebase.database import get_recent_issues
 from firebase.init import db
 from firebase.database import get_issue_stats_by_user
+from firebase.database import get_admin_emails
+from utils.email_service import send_email
+from utils.email_templates import admin_new_issue_email
+
 
 student_bp = Blueprint("student", __name__)
 
@@ -23,7 +27,18 @@ def report_issue():
 
     user_id = request.user["uid"]
 
+    # 1️⃣ Create issue
     issue_id = create_issue(data, user_id)
+
+    # 2️⃣ Notify admins
+    admin_emails = get_admin_emails()
+    if admin_emails:
+        email_body = admin_new_issue_email(data)
+        send_email(
+            to_emails=admin_emails,
+            subject="New Campus Issue Reported",
+            html_content=email_body
+        )
 
     return jsonify({
         "message": "Issue reported successfully",
