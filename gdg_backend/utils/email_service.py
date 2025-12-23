@@ -13,26 +13,36 @@ SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 print("📧 ABOUT TO SEND EMAIL")
 
 def send_email(to_emails, subject, html_content):
-    print("📧 send_email() CALLED")
-    print("➡️ To emails:", to_emails)
-
     if not to_emails:
-        print("⚠️ No recipient emails. Skipping send.")
         return
 
+    print("📧 send_email() CALLED")
+    print("➡️ To emails:", to_emails)
+    print("🔌 Connecting to SMTP:", SMTP_SERVER, SMTP_PORT)
+
     msg = MIMEMultipart()
-    msg["From"] = f"Campus Issue Portal <{SENDER_EMAIL}>"
+    msg["From"] = SENDER_EMAIL          # ⚠️ IMPORTANT
     msg["To"] = ", ".join(to_emails)
     msg["Subject"] = subject
 
     msg.attach(MIMEText(html_content, "html"))
 
-    print("🔌 Connecting to SMTP:", SMTP_SERVER, SMTP_PORT)
-
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+    try:
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=20)
         server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        print("✅ SMTP login successful")
+        print("🔐 TLS started")
 
-        server.send_message(msg)
-        print("📤 Email sent successfully")
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        print("✅ Logged into SMTP")
+
+        server.sendmail(
+            SENDER_EMAIL,
+            to_emails,
+            msg.as_string()
+        )
+        print("📨 Email SENT successfully")
+
+        server.quit()
+
+    except Exception as e:
+        print("❌ EMAIL FAILED:", e)
