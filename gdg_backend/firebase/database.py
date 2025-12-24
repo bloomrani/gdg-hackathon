@@ -104,6 +104,7 @@ def get_issue_stats_by_user(user_id):
     total = 0
     pending = 0
     resolved = 0
+    rejected = 0
 
     for doc in docs:
         total += 1
@@ -113,16 +114,21 @@ def get_issue_stats_by_user(user_id):
             pending += 1
         elif status == "Resolved":
             resolved += 1
+        elif status == "Rejected":
+            rejected += 1
 
     return {
         "total": total,
         "pending": pending,
         "resolved": resolved
+        "rejected": rejected
     }
 
 def update_issue_status(issue_id, new_status):
     if new_status not in VALID_STATUSES:
         raise ValueError("Invalid status")
+    if new_status in TERMINAL_STATUSES:
+        raise ValueError("Use finalize_issue for final states")
 
     issue_ref = db.collection("issues").document(issue_id)
     issue_doc = issue_ref.get()
@@ -160,3 +166,33 @@ def get_admin_emails():
 
     return emails
 
+def finalize_issue(issue_id, final_status, admin_note):
+    if final_status not in TERMINAL_STATUSES:
+        raise ValueError("Invalid final status")
+
+    issue_ref = db.collection("issues").document(issue_id)
+    issue_doc = issue_ref.get()
+
+    if not issue_doc.exists:
+        raise ValueError("Issue not found")
+
+    issue_data = issue_doc.to_dict()
+    current_status = issue_data.get("status")
+
+    # 🔒 Prevent double-finalization
+    if current_status in TERMINAL_STATUSES:
+        raise PermissionError("Issue already finalized")
+
+    update_data = {
+        "status": final_status,
+        "admin_note": admin_note,
+        "updated_at": datetime.utcnow()
+    }
+
+    if final_status == "Resolved":
+        update_data["resolved_at"] = datetime.utcnow()
+
+    elif final_status == "Rejected":
+        update_data["rejected_at"] = datetime.utcnow()
+
+    issue_ref.update(update_data)
