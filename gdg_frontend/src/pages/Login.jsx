@@ -12,10 +12,11 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!email.endsWith("@stcet.ac.in")) {
-      return setError("Please use your STCET college email.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return setError("Please enter a valid email address.");
     }
+
 
     if (!password) {
       return setError("Password is required.");
@@ -79,13 +80,13 @@ export default function Login() {
             {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                College Email
+                Email Address
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="yourname@stcet.ac.in"
+                placeholder="yourname@example.com"
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -129,7 +130,7 @@ export default function Login() {
           </p>
 
           <p className="text-xs text-slate-400 text-center mt-6">
-            Authorized institutional users only
+            &copy; 2025 Campus Issue Portal. All rights reserved.
           </p>
         </div>
       </div>
