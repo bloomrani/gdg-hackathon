@@ -136,7 +136,7 @@ flowchart TD
 - **Backend**: Flask (Python)
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Auth
-- **AI Integration**: Custom AI APIs
+- **AI Integration**: Gemini AI API
 - **Deployment**: Vercel, Render
 
 ---
