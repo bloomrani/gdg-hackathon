@@ -1,177 +1,158 @@
-<h1 align="center">🏫 Campus Issue Reporting System</h1>
+# 🏫 Campus Issue Portal
 
-<p align="center">
-  <b>AI-Powered • Role-Based • Hackathon Prototype</b>
-</p>
+A centralized, AI-assisted web platform that enables students to report campus issues and allows administrators to track, manage, and resolve them efficiently with transparency and accountability.
 
-<p align="center">
-  An intelligent campus issue reporting platform that streamlines communication between students and administrators using AI-assisted automation.
-</p>
+---
 
-<hr/>
+## 🚀 Problem Statement
 
-<h2>🚀 Highlights</h2>
-<ul>
-  <li>🤖 AI-assisted issue reporting</li>
-  <li>🔐 Role-based access (Student / Admin)</li>
-  <li>📊 Admin dashboard with smart insights</li>
-  <li>🧠 Duplicate issue detection</li>
-  <li>📉 Controlled AI usage with clear math</li>
-</ul>
+In many institutions, campus-related issues such as infrastructure faults, hygiene problems, or classroom maintenance are reported informally through word-of-mouth or scattered channels.  
+This leads to:
+- Delayed resolutions
+- Lack of accountability
+- No proper tracking or feedback
+- Repeated reporting of the same issues
 
-<hr/>
+---
 
-<h2>❓ Problem Statement</h2>
-<p>
-Campus issues like broken projectors, infrastructure failures, or network outages are often reported informally,
-leading to delays, duplicate complaints, and lack of accountability.
-</p>
+## 💡 Our Solution
 
-<p>
-This project introduces a <b>centralized, AI-powered system</b> to report, track, and resolve campus issues efficiently.
-</p>
+**Campus Issue Portal** provides a structured digital system where:
+- Students can easily report issues
+- Administrators can monitor, prioritize, and resolve them
+- AI assists in summarization, categorization, and duplicate detection
+- Students receive real-time updates and feedback
 
-<hr/>
+---
 
-<h2>🔄 System Workflow</h2>
+## ⭐ Major USP
 
-```mermaid
-graph TD
-    A[Student Logs In] --> B[Report Issue]
+**AI-assisted issue reporting and management** — the system intelligently autofills issue details, summarizes reports, and detects duplicates, reducing effort for students and workload for administrators.
 
-    B --> C[AI Autofill<br/>Description, Category, Severity]
-    C --> D[Issue Stored in Firestore]
+---
 
-    D --> E[Admin Dashboard]
+## ✨ Key Features
 
-    E --> F[AI One-Line Summary]
-    E --> G[AI Duplicate Issue Detection]
+### 👩‍🎓 Student Features
+- Secure login & registration
+- Report issues with title, description, category, severity, and location
+- **AI-powered autofill** for description, category, and severity
+- Track issue status in real time
+- View admin feedback and resolution updates
+- Email notification on issue resolution or rejection
 
-    E --> H[Admin Updates Status]
-    H --> I[Pending]
-    H --> J[In Progress]
-    H --> K[Resolved]
+### 🧑‍💼 Admin Features
+- Centralized admin dashboard
+- View and manage all reported issues
+- AI-generated issue summaries
+- Duplicate issue detection
+- Update issue status (Pending / In Progress / Resolved / Rejected)
+- Add **internal admin notes** (not visible to students)
+- Send **custom messages to students**
+- Automated email notifications on final resolution
+
+---
+
+## 🧠 AI Capabilities
+
+- Issue summarization for quick admin review
+- Duplicate issue detection to avoid redundant work
+- Smart autofill assistance during issue reporting
+
+---
+
+## 🏗️ System Architecture (High Level)
+
+- **Frontend**: React (Student & Admin dashboards)
+- **Backend**: Flask REST API
+- **Authentication**: Firebase Authentication
+- **Database**: Firebase Firestore
+- **AI Services**: Custom AI endpoints for summarization and duplicate detection
+- **Email Service**: Automated email notifications on issue finalization
+- **Deployment**:
+  - Frontend: Vercel
+  - Backend: Render
+
+---
+``` mermaid
+flowchart TD
+    A[Student Registers / Logs In]
+    B[Student Reports Issue]
+    C["AI Assists Autofill Description, Category, Severity"]
+    D[Issue Stored in Database]
+    E[Issue Routed to Admin Dashboard]
+    F["AI Analysis Summary & Duplicate Detection"]
+    G[Admin Reviews Issue]
+    H["Admin Updates Status\nPending / In Progress / Resolved / Rejected"]
+    I["Admin Adds Internal Note\nand Student Message"]
+    J[Email Notification Sent to Student]
+    K["Student Views Updated Status\nand Feedback"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    J --> K
 ```
 
-<hr/>
+---
 
-<h2>🎓 Student Side Features</h2>
-<ul>
-  <li>🔐 Secure authentication</li>
-  <li>📝 Issue reporting with validation</li>
-  <li>🤖 AI-powered autofill (description, category, severity)</li>
-  <li>📋 Dashboard with issue tracking</li>
-</ul>
+## 🔐 Security & Access Control
 
-<hr/>
+- Token-based authentication
+- Role-based access (Student / Admin)
+- Protected routes and APIs
+- Internal admin notes hidden from students
 
-<h2>🛠️ Admin Side Features</h2>
-<ul>
-  <li>🔑 Role-based admin access</li>
-  <li>🔍 Search, filter, and sort issues</li>
-  <li>🤖 AI one-line summaries</li>
-  <li>⚠️ AI duplicate unresolved issue detection</li>
-  <li>📁 Resolved issues separated</li>
-</ul>
+---
+## 🎥 Demo
 
-<hr/>
+- 🔗 Live App: (https://gdg-hackathon-32wi.vercel.app/) 
+- 🔗 Video: (https://drive.google.com/file/d/1qD5SObnhdG7QCoxJ-64Vc4HGDqe2-iTl/view?usp=sharing)
 
-<h2>🤖 AI Features Implemented</h2>
+---
 
-<h3>1️⃣ AI Autofill (Student)</h3>
-<ul>
-  <li>Auto-generates description</li>
-  <li>Predicts category</li>
-  <li>Assigns severity</li>
-</ul>
+## 🌱 Future Enhancements
 
-<h3>2️⃣ AI One-Line Summary (Admin)</h3>
-<p>
-Generates a concise summary to help admins quickly understand issues.
-</p>
+- Mobile application (Android & iOS)
+- Multi-institution support
+- Issue assignment to maintenance staff
+- SLA tracking and analytics
+- Multilingual AI support
+- Location-based heatmaps
+- WhatsApp/SMS notifications
+- OAuth login (Google Sign-In)
 
-<h3>3️⃣ AI Duplicate Issue Detection (Admin)</h3>
-<p>
-Detects whether a newly reported issue is similar to existing unresolved issues.
-</p>
+---
 
-<hr/>
+## 🛠️ Tech Stack
 
-<h2>📐 AI Request Consumption (Math)</h2>
+- **Frontend**: React, Tailwind CSS
+- **Backend**: Flask (Python)
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Auth
+- **AI Integration**: Custom AI APIs
+- **Deployment**: Vercel, Render
 
-<p>Each issue can trigger at most:</p>
-<ul>
-  <li>1 AI call → Autofill (Student)</li>
-  <li>1 AI call → Summary (Admin)</li>
-  <li>1 AI call → Duplicate Detection (Admin)</li>
-</ul>
+---
 
-<pre>
-Let I = number of issues per day
+## 👥 Team
 
-Total AI Requests per Day (RPD) = I × 3
-</pre>
+**Parallel Minds**  
+A collaborative team focused on building scalable, intelligent, and user-centric solutions.
 
-<p><b>Example:</b></p>
-<pre>
-5 issues/day → 15 AI requests/day
-</pre>
+- **[Ritankar Bose](https://www.linkedin.com/in/ritankar-bose-a30089329/)** — Frontend Development  
+  *UI design, React architecture, user experience*
 
-<p>
-All AI calls are explicit, optional, and controlled to stay within free-tier limits.
-</p>
+- **[Rani Bhattacharjee](https://www.linkedin.com/in/rani-bhattacharjee-88320b394/)** — Backend Development  
+  *Flask APIs, database logic, authentication, AI integration*
+---
 
-<hr/>
+## 📜 License
 
-<h2>🧱 Tech Stack</h2>
-
-<h3>🎨 Frontend</h3>
-<ul>
-  <li>⚛️ React (Vite)</li>
-  <li>🎨 Tailwind CSS</li>
-  <li>🔗 Axios</li>
-</ul>
-
-<h3>🧠 AI</h3>
-<ul>
-  <li>🤖 Google Gemini AI</li>
-</ul>
-
-<h3>🔧 Backend</h3>
-<ul>
-  <li>🐍 Flask (Python)</li>
-  <li>🔐 Firebase Authentication</li>
-  <li>📡 REST APIs</li>
-</ul>
-
-<h3>🗄️ Database</h3>
-<ul>
-  <li>🔥 Firebase Firestore</li>
-</ul>
-
-<hr/>
-
-<h2>👥 Collaborators</h2>
-<ul>
-  <li>👨‍💻 Author 1 – <i>Ritankar Bose</i></li>
-  <li>👩‍💻 Author 2 – <i>Rani Bhattacharjee</i></li>
-</ul>
-
-<p>
-Built with teamwork, curiosity, and late-night debugging ☕
-</p>
-
-<hr/>
-
-<h2>📜 License</h2>
-<p>
-This project is developed for educational and hackathon purposes.
-</p>
-
-<hr/>
-
-<h2>🌟 Final Note</h2>
-<p>
-This is not just a demo — it is a thoughtfully designed system with responsible AI usage,
-clear workflows, and real-world scalability.
-</p>
+This project is developed as a prototype for hackathon and educational purposes.
