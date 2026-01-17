@@ -62,7 +62,7 @@ export default function IssueAI({ issue, allIssues }) {
         );
       }
     } catch {
-      // Silent fail — AI should never block admin
+      
     }
   };
 
@@ -71,7 +71,7 @@ export default function IssueAI({ issue, allIssues }) {
       {/* AI Summary */}
       <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
         <p className="text-sm font-semibold text-purple-700 mb-1">
-          🤖 AI Summary
+          Short Summary : 
         </p>
         <p className="text-sm text-slate-700">
           {loading ? "Thinking..." : summary}
